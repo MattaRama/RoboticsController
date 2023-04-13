@@ -1,6 +1,9 @@
 import ntcore
 import time
-from link_constants import LinkConstants
+from link.link_constants import LinkConstants
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 class NetHandlerOptions:
     def __init__(self, teamNumber):
@@ -13,15 +16,18 @@ class NetHandler:
         self.teamNumber = teamNumber
         self.__pushDelay__ = pushDelay
         
+        # NT Setup
         self.inst = ntcore.NetworkTableInstance.getDefault()
-        self.testTable = self.inst.getTable('Shuffleboard')
         self.inst.startClient4('ExtraIO Controller')
         self.inst.setServerTeam(teamNumber)
         self.inst.startDSClient()
 
-n = NetHandler(6868)
-table = n.inst.getTable('Shuffleboard')
-print(n.inst.isConnected())
-entry = table.getEntry('test')
-print(entry)
-entry.setString('bruh')
+        # Table setup
+        self.table = self.inst.getTable('ExtraIO')
+
+#n = NetHandler(6868)
+#table = n.inst.getTable('Shuffleboard')
+#print(n.inst.isConnected())
+#entry = table.getEntry('test')
+#print(entry)
+#entry.setString('bruh')

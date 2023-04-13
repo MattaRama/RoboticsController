@@ -16,3 +16,6 @@ class LED:
     def setBrightnessPercent(self, percent):
         pwmVal = math.floor(percent * 255)
         self.setBrightnessPWM(pwmVal)
+
+    def setState(self, high):
+        self.controller.writePacket('G' + self.charId + ('1' if high else '0') + ';')

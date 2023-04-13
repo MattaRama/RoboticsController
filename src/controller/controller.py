@@ -48,7 +48,7 @@ class Controller:
     def getLED(self, pin):
         return LED(self, pin)
 
-    def gePotentiometer(self, pin, min = 0, max = 1023):
+    def getPotentiometer(self, pin, min = 0, max = 1023):
         return Potentiometer(self, pin, min, max)
 
     def getRGBLed(self, rPin, gPin, bPin):
