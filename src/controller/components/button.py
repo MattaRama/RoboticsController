@@ -5,6 +5,7 @@ class Button:
         self.controller = controller
         self.pinId = pinId
         self.pinChar = chr(pinId + Constants.CHARACTER_OFFSET)
+        controller.setPinMode(pinId, True)
 
     def getValue(self):
         self.controller.writePacket('F' + self.pinChar + ';')

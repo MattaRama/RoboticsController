@@ -6,6 +6,7 @@ class LED:
         self.controller = controller
         self.id = id
         self.charId = chr(id + Constants.CHARACTER_OFFSET)
+        controller.setPinMode(id, False)
     
     def setBrightnessPWM(self, pwm):
         pwmStr = str(pwm)

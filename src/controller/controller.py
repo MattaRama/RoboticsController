@@ -5,12 +5,13 @@ from controller.components.button import Button
 from controller.components.led import LED
 from controller.components.potentiometer import Potentiometer
 from controller.components.rgbled import RGBLed
+from controller.constants import Constants
 
 class Controller:
     def __init__(self, port):
         # establish arduino 
         self.arduino = serial.Serial(port=port, baudrate=9600, timeout=.1)
-        self.lcds = []
+        self.lcds = [] # TODO: remove this
 
         # wait for connection to be verified
         packet = self.readPacket()
@@ -18,6 +19,7 @@ class Controller:
             raise Exception('First Arduino packet was not "Begin;"')
 
         # get inits
+        # TODO: this is no longer needed, as LCDs are established by the client PC, not the arduino
         packet = ''
         while (packet := self.readPacket()) != 'Init;':
             # LCD inits
@@ -53,3 +55,11 @@ class Controller:
 
     def getRGBLed(self, rPin, gPin, bPin):
         return RGBLed(self, rPin, gPin, bPin)
+    
+    def setPinMode(self, pin, isInput):
+        mode = 'J' if isInput else 'I'
+        self.arduino.write(bytes(mode + (chr(pin + Constants.CHARACTER_OFFSET)) + ';', 'ascii'))
+        return
+    
+    def getLCD(self, i2cId):
+        return LCD(self, i2cId)

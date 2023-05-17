@@ -8,6 +8,9 @@ class RGBLed:
         self.ledR = LED(controller, rId)
         self.ledG = LED(controller, gId)
         self.ledB = LED(controller, bId)
+        controller.setPinMode(rId, False)
+        controller.setPinMode(gId, False)
+        controller.setPinMode(bId, False)
 
     def setRGBPWM(self, pwmR, pwmG, pwmB):
         self.ledR.setBrightnessPWM(pwmR)

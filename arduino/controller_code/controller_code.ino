@@ -13,16 +13,27 @@
 #define TYPE_GETDIGITAL VAL_OFFSET + 5		// F
 #define TYPE_SETDIGITAL VAL_OFFSET + 6		// G
 #define TYPE_SETPWM VAL_OFFSET + 7			// H
+#define TYPE_SETOUTPUT VAL_OFFSET + 8 // I
+#define TYPE_SETINPUT VAL_OFFSET + 9 // J
+#define TYPE_INITLCD VAL_OFFSET + 10 // K
 
 #define ANALOG_CHECK_COUNT 10
 #define ANALOG_CHECK_DELAY 10
 
-// pin definitions
-int digitalPinOutputs[] = { 3, 5, 6, 7 };
-int digitalPinInputs[] = { 2 };
+// store displays
+Adafruit_LiquidCrystal lcds[8] = {
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL
+};
 
 // init displays
-Adafruit_LiquidCrystal lcd1(0);
+/*Adafruit_LiquidCrystal lcd1(0);
 
 Adafruit_LiquidCrystal lcds[1] = {
   lcd1
@@ -30,7 +41,7 @@ Adafruit_LiquidCrystal lcds[1] = {
 
 struct Adafruit_LiquidCrystal getLCD(int i) {
   return lcds[i - VAL_OFFSET];
-}
+}*/
 
 void readRequest(char* buff) {
   for (int i = 0; i < PACKET_LEN; i++) {
@@ -50,25 +61,15 @@ void setup()
   Serial.begin(9600);
   Serial.write("Begin;");
   
-  // init digital inputs
-  for (int i = 0; i < sizeof(digitalPinInputs) / sizeof(int); i++) {
-    pinMode(digitalPinInputs[i], INPUT);
-  }
-  
-  // init digital outputs
-  for (int i = 0; i < sizeof(digitalPinOutputs) / sizeof(int); i++) {
-    pinMode(digitalPinOutputs[i], OUTPUT);
-  }
-  
   // init liquidcrystals
-  for (int i = 0; i < sizeof(lcds) / sizeof(Adafruit_LiquidCrystal); i++) {
+  /*for (int i = 0; i < sizeof(lcds) / sizeof(Adafruit_LiquidCrystal); i++) {
     lcds[i].begin(16,2);
     lcds[i].setBacklight(HIGH);
     
     Serial.print("LCDInit ");
     Serial.print(i);
     Serial.print(";");
-  }
+  }*/
 
   Serial.write("Init;");
 }
@@ -85,13 +86,17 @@ void loop()
     }
     
     case TYPE_SETCURSOR: {
-      Adafruit_LiquidCrystal lcd = getLCD(packet[1]);
-	    lcd.setCursor(packet[2] - VAL_OFFSET, packet[3] - VAL_OFFSET);
+      //Adafruit_LiquidCrystal lcd = getLCD(packet[1]);
+	    //Adafruit_LiquidCrystal lcd = Adafruit_LiquidCrystal(packet[1] - VAL_OFFSET);
+      Adafruit_LiquidCrystal lcd = lcds[packet[1] - VAL_OFFSET];
+      lcd.setCursor(packet[2] - VAL_OFFSET, packet[3] - VAL_OFFSET);
       break;
     }
     
     case TYPE_PRINT: {
-      Adafruit_LiquidCrystal lcd = getLCD(packet[1]);
+      //Adafruit_LiquidCrystal lcd = getLCD(packet[1]);
+      //Adafruit_LiquidCrystal lcd = Adafruit_LiquidCrystal(packet[1] - VAL_OFFSET);
+      Adafruit_LiquidCrystal lcd = lcds[packet[1] - VAL_OFFSET];
       for (int i = 2; i < PACKET_LEN; i++) {
         if (packet[i] == ';') {
           break;
@@ -103,7 +108,9 @@ void loop()
     }
     
     case TYPE_CLEAR: {
-      Adafruit_LiquidCrystal lcd = getLCD(packet[1]);
+      //Adafruit_LiquidCrystal lcd = getLCD(packet[1]);
+      //Adafruit_LiquidCrystal lcd = Adafruit_LiquidCrystal(packet[1] - VAL_OFFSET);
+      Adafruit_LiquidCrystal lcd = lcds[packet[1] - VAL_OFFSET];
       lcd.clear();
       break;
     }
@@ -150,6 +157,23 @@ void loop()
       int pwmVal = atoi(numStr);
       analogWrite(packet[1] - VAL_OFFSET, pwmVal);
       break;
+    }
+
+    case TYPE_SETOUTPUT: {
+      pinMode(packet[1] - VAL_OFFSET, OUTPUT);
+      break;
+    }
+
+    case TYPE_SETINPUT: {
+      pinMode(packet[1] - VAL_OFFSET, INPUT);
+      break;
+    }
+
+    case TYPE_INITLCD: {
+      Adafruit_LiquidCrystal lcd = lcds[packet[1] - VAL_OFFSET];
+      lcd.begin(16,2);
+      lcd.setBacklight(HIGH);
+      lcds[packet[1] - VAL_OFFSET] = lcd;
     }
   }
 
